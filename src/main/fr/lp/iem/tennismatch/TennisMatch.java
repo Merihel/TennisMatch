@@ -53,9 +53,8 @@ public class TennisMatch {
         } else if (player.equals(getPlayer2())){
             return getPlayer1();
         } else {
-            throw new Error("Joueur inconnu...");
+            throw new Error("Joueur non trouvé");
         }
-
     }
 
     public void setTieBreakInLastSet(boolean tieBreakInLastSet) {
@@ -63,21 +62,55 @@ public class TennisMatch {
     }
 
     public void updateWithPointWonBy(Player player) {
-        player.updateScore(1);
+        if (player.getScore() == 3) { // si points du joueur = 40
+            if (getOtherPlayer(player).getScore() < 3) { //si autre joueur a moins de 40
+                player.setScore(5); //joueur gagne le jeu, passe à "GAME"
+            } else if (getOtherPlayer(player).getScore() == 3 || getOtherPlayer(player).getScore() == 4 ) { //Si autre est à 40 ou A
+                player.setScore(4);//joueur passe à "A"
+            }
+        } else {
+            player.updateScore(1);
+        }
+
         if (pointsForPlayer(player) == "A") {
             if (pointsForPlayer(getOtherPlayer(player)) == "A") {
                 getOtherPlayer(player).setScore(3);
             }
         }
+
         if (pointsForPlayer(player) == "GAME") {
-            currentGame += 1;
             player.updateGames(1);
+
+            //Test normal des deux points d'écart
+            if(player.getGames() == 6 && player.getGames() == getOtherPlayer(player).getGames()+2) {
+                player.updateSets(1);
+                //TODO Sauvegarder le nombre de jeux
+                player.setScore(0);
+                getOtherPlayer(player).setScore(0);
+                player.setGames(0);
+                getOtherPlayer(player).setGames(0);
+            }
+
+            /*
+            if (player.getGames() == 6) {
+                if (player.getGames() == (getOtherPlayer(player).getGames()+2)) { //J1 avance J2 de 2 jeux : WIN
+                    currentSet += 1;
+                    player.updateSets(1);
+                    player.setGames(0);
+                } else if (player.getGames() == getOtherPlayer(player).getGames()) {//J1 et J2 sont à 6 =: tie break
+
+                } else { //J1 ne devance pas J2 de 2 jeux au minimum : on continue
+                    currentGame += 1;
+                    player.updateGames(1);
+                }
+            } else {
+                currentGame += 1;
+                player.updateGames(1);
+            }
             player.setScore(0);
             getOtherPlayer(player).setScore(0);
-            if (player.getGames() == 6) {
-                currentSet += 1;
-                player.updateSets(1);
-            }
+            */
+
         }
 
         //Check for winner here
