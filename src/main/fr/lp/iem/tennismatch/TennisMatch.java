@@ -7,6 +7,7 @@ public class TennisMatch {
     private Player player2;
     private MatchType matchType;
     private boolean tieBreakInLastSet;
+    private boolean inTieBreak;
     private int currentSet;
     private int currentGame;
 
@@ -62,64 +63,69 @@ public class TennisMatch {
     }
 
     public void updateWithPointWonBy(Player player) {
-        if (player.getScore() == 3) { // si points du joueur = 40
-            if (getOtherPlayer(player).getScore() < 3) { //si autre joueur a moins de 40
-                player.setScore(5); //joueur gagne le jeu, passe à "GAME"
-            } else if (getOtherPlayer(player).getScore() == 3 || getOtherPlayer(player).getScore() == 4 ) { //Si autre est à 40 ou A
-                player.setScore(4);//joueur passe à "A"
-            }
-        } else {
-            player.updateScore(1);
-        }
-
-        if (pointsForPlayer(player) == "A") {
-            if (pointsForPlayer(getOtherPlayer(player)) == "A") {
-                getOtherPlayer(player).setScore(3);
-            }
-        }
-
-        if (pointsForPlayer(player) == "GAME") {
-            player.updateGames(1);
-
-            //Gain du set puisque 2 points d'écart
-            if (player.getGames() == 6) {
-                if (getOtherPlayer(player).getGames() == 6) {
-                    if (this.tieBreakInLastSet) {
-                        System.out.println("dernier set avec tie break");
-                    } else {
-                        System.out.println("dernier set sans tie break");
-                    }
-                } else if (player.getGames() == getOtherPlayer(player).getGames() + 2) {
-                    System.out.println(player.getName() + " gagne un set car 2 jeux d'écart et au moins 6");
-                    addSetToPlayer(player);
-                }
-            } else if (player.getGames() == 7 && getOtherPlayer(player).getGames() == 5) {
-                System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
-                addSetToPlayer(player);
-            }
-
-            /*
-            if (player.getGames() == 6) {
-                if (player.getGames() == (getOtherPlayer(player).getGames()+2)) { //J1 avance J2 de 2 jeux : WIN
-                    currentSet += 1;
-                    player.updateSets(1);
-                    player.setGames(0);
-                } else if (player.getGames() == getOtherPlayer(player).getGames()) {//J1 et J2 sont à 6 =: tie break
-
-                } else { //J1 ne devance pas J2 de 2 jeux au minimum : on continue
-                    currentGame += 1;
-                    player.updateGames(1);
+        if (!this.inTieBreak) {
+            if (player.getScore() == 3) { // si points du joueur = 40
+                if (getOtherPlayer(player).getScore() < 3) { //si autre joueur a moins de 40
+                    player.setScore(5); //joueur gagne le jeu, passe à "GAME"
+                } else if (getOtherPlayer(player).getScore() == 3 || getOtherPlayer(player).getScore() == 4 ) { //Si autre est à 40 ou A
+                    player.setScore(4);//joueur passe à "A"
                 }
             } else {
-                currentGame += 1;
-                player.updateGames(1);
+                player.updateScore(1);
             }
 
-            */
-            player.setScore(0);
-            getOtherPlayer(player).setScore(0);
-        }
+            if (pointsForPlayer(player) == "A") {
+                if (pointsForPlayer(getOtherPlayer(player)) == "A") {
+                    getOtherPlayer(player).setScore(3);
+                    player.setScore(3);
+                }
+            }
 
+            if (pointsForPlayer(player) == "GAME") {
+                player.updateGames(1);
+
+                //Gain du set puisque 2 points d'écart
+                if (player.getGames() == 6) {
+                    if (getOtherPlayer(player).getGames() == 6) {
+                        if (this.matchType.equals(2)) {
+                            if (this.tieBreakInLastSet && player.getSets() == 1) {
+                                System.out.println("dernier set avec tie break");
+                                this.inTieBreak = true;
+                            } else {
+                                System.out.println("dernier set sans tie break");
+                            }
+                        } else {
+                            if (this.tieBreakInLastSet && player.getSets() == 2) {
+                                System.out.println("dernier set avec tie break");
+                                this.inTieBreak = true;
+                            } else {
+                                System.out.println("dernier set sans tie break");
+                            }
+                        }
+
+                    } else if (player.getGames() == getOtherPlayer(player).getGames() + 2) {
+                        System.out.println(player.getName() + " gagne un set car 2 jeux d'écart et au moins 6");
+                        addSetToPlayer(player);
+                    }
+                } else if (player.getGames() == 7 && getOtherPlayer(player).getGames() == 5) {
+                    System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
+                    addSetToPlayer(player);
+                }
+                player.setScore(0);
+                getOtherPlayer(player).setScore(0);
+            }
+        } else if (this.inTieBreak) { //tie break sur le dernier set
+            player.updateScore(1);
+            if (player.getScore() == 7) { //Si on a 7 points...
+                if (getOtherPlayer(player).getScore() <= 5) { //...On teste de savoir si l'autre joueur a 5 ou moins et win si c'est le cas
+                    addSetToPlayer(player);
+                }
+            } else if (player.getScore() >= 7 && player.getScore() >= getOtherPlayer(player).getScore() + 2) { // si score du joueur est superieur ou égal à score du j2 + 2
+                    addSetToPlayer(player);
+            } else {
+                System.out.print("Still not won with the tie break because no gap of 2...\n");
+            }
+        }
         //Check for winner here
     }
 
