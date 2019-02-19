@@ -81,14 +81,21 @@ public class TennisMatch {
         if (pointsForPlayer(player) == "GAME") {
             player.updateGames(1);
 
-            //Test normal des deux points d'écart
-            if(player.getGames() == 6 && player.getGames() == getOtherPlayer(player).getGames()+2) {
-                player.updateSets(1);
-                //TODO Sauvegarder le nombre de jeux
-                player.setScore(0);
-                getOtherPlayer(player).setScore(0);
-                player.setGames(0);
-                getOtherPlayer(player).setGames(0);
+            //Gain du set puisque 2 points d'écart
+            if (player.getGames() == 6) {
+                if (getOtherPlayer(player).getGames() == 6) {
+                    if (this.tieBreakInLastSet) {
+                        System.out.println("dernier set avec tie break");
+                    } else {
+                        System.out.println("dernier set sans tie break");
+                    }
+                } else if (player.getGames() == getOtherPlayer(player).getGames() + 2) {
+                    System.out.println(player.getName() + " gagne un set car 2 jeux d'écart et au moins 6");
+                    addSetToPlayer(player);
+                }
+            } else if (player.getGames() == 7 && getOtherPlayer(player).getGames() == 5) {
+                System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
+                addSetToPlayer(player);
             }
 
             /*
@@ -107,13 +114,22 @@ public class TennisMatch {
                 currentGame += 1;
                 player.updateGames(1);
             }
+
+            */
             player.setScore(0);
             getOtherPlayer(player).setScore(0);
-            */
-
         }
 
         //Check for winner here
+    }
+
+    public void addSetToPlayer(Player player) {
+        player.updateSets(1);
+        //TODO Sauvegarder le nombre de jeux
+        player.setScore(0);
+        getOtherPlayer(player).setScore(0);
+        player.setGames(0);
+        getOtherPlayer(player).setGames(0);
     }
 
     public String pointsForPlayer(Player player) {
