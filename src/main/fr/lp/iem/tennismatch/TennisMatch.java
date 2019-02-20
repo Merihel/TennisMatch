@@ -78,12 +78,13 @@ public class TennisMatch {
                 if (pointsForPlayer(getOtherPlayer(player)) == "A") {
                     getOtherPlayer(player).setScore(3);
                     player.setScore(3);
+                    //Les deux joueurs passent à 40
                 }
             }
 
             if (pointsForPlayer(player) == "GAME") {
                 player.updateGames(1);
-
+                System.out.println("won point");
                 //Gain du set puisque 2 points d'écart
                 if (player.getGames() == 6) {
                     if (getOtherPlayer(player).getGames() == 6) {

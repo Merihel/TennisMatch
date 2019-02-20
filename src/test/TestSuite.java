@@ -135,16 +135,6 @@ public class TestSuite {
         m.getPlayer1().setSets(1);
         m.getPlayer2().setSets(1);
 
-        //Début du match, les joueurs commencent avec chacun 5 jeux
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 15
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 30
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 40
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 gagne un jeu
-        System.out.println("P1 set: "+m.getPlayer1().getSets());
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 15
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 30
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 40
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 gagne un jeu
         System.out.println("P2 set: "+m.getPlayer2().getSets());
         System.out.println("-------------------------");
         System.out.println("P1 games: "+m.getPlayer1().getGames());
@@ -156,13 +146,16 @@ public class TestSuite {
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 1
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 2
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 3
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 4, gagne un set, repasse à 0
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 1
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 2
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 3
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 4
-        //PROBLEME ICI ON N'EST PAS EN MODE TIE BREAK
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 5
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 6
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 7
 
-        assertEquals(1, m.getPlayer1().getSets()); //Le test passe si player 1 a bien gagné 1 jeu en tie break avec 7 points et autre joueur à 5 ou moins
+
+        assertEquals(2, m.getPlayer1().getSets()); //Le test passe si player 1 a bien gagné 1 jeu en tie break avec 7 points et autre joueur à 5 ou moins
     }
 
     @Test //On gagne un set sans 2 d'écart, donc il y a tie break : WIN en plus de 7 et 2 d'écart
