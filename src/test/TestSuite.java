@@ -164,8 +164,10 @@ public class TestSuite {
         player2 = new Player("Doe");
         m = new TennisMatch(player1, player2, MatchType.BEST_OF_THREE, true);
 
-        m.getPlayer1().setGames(5);
-        m.getPlayer2().setGames(5);
+        m.getPlayer1().setGames(4);
+        m.getPlayer2().setGames(4);
+        m.getPlayer1().setSets(1);
+        m.getPlayer2().setSets(1);
 
         //Début du match, les joueurs commencent avec chacun 5 jeux
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 15
@@ -185,49 +187,51 @@ public class TestSuite {
         System.out.println("P2 set: "+m.getPlayer2().getSets());
         System.out.println("PERSONNE N'A LE SET ----> TIE BREAK");
         System.out.println("-------------------------");
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 1
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 15
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 30
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 40
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à A : gain du jeu
+
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 15
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 30
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 40
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à A : gain du jeu
+
+        System.out.println("Egalité des jeux à 6-6 : on continue..");
+
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 1, mais J2 est à 0.. Donc continue
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 1
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 2
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 2
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 3
+        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 3
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 4
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 5
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 6
 
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 1
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 2
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 3
+        System.out.println("J1 est censé gagner le jeu en 5 - 3 mais pas assez de points, doit aller en 7 au moins");
+
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 6
         m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 4
         m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 5
         m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 6
-
-        System.out.println("Egalité à 6-6 : on continue..");
-
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 7, mais J2 est à 6.. Donc continue
+        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 7
         m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 7
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 8
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 8
         m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 9
-        m.updateWithPointWonBy(m.getPlayer2()); //J2 passe à 9
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 10
-        m.updateWithPointWonBy(m.getPlayer1()); //J1 passe à 11
 
-        System.out.println("J1 est censé gagner le set en 11 - 9");
+        System.out.println("J1 gagne le jeu en 9 - 7, et donc le set, et le match");
 
-        assertEquals(1, m.getPlayer1().getSets()); //Le test passe si player 1 a bien gagné 1 jeu avec avantage
-    }
-
-    @Before //Dernier set: pas de tie break possible, jeux qui peuvent aller plus haut que 6
-    public void winSetSansTieBreak() throws Exception {
-
+        assertEquals(2, m.getPlayer1().getSets()); //Le test passe si player 1 a bien gagné 1 jeu avec avantage
     }
 
     @Test
-    public void setUp() throws Exception {
+    public void setUpMatch() throws Exception { //HASARD le test peut fail dans la mesure où il peut nécessiter bien plus de 250 coups
         //MATCH 1
         player1 = new Player("John");
         player2 = new Player("Doe");
         m = new TennisMatch(player1, player2, MatchType.BEST_OF_THREE, false);
 
-        for (int i=0; i<100; i++) {
+        for (int i=0; i<250; i++) {
             double rand = Math.random() * ( 20 - 0 );
             String test = "";
             if (rand > 10) {
@@ -246,20 +250,7 @@ public class TestSuite {
         System.out.print("FINAL \n");
         System.out.print(player1.statement() + "\n");
         System.out.print(player2.statement() + "\n");
+
+        assertEquals(m.getIsRunning(), false);
     }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void test() {
-        String res = "Joueur1: Score"+ m.pointsForPlayer(m.getPlayer1())
-                + ", Jeu"+ m.getPlayer1().getGames()
-                + ", Set"+ m.getPlayer1().getSets();
-
-
-    }
-
-
 }

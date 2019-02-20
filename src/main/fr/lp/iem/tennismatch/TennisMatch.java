@@ -8,16 +8,14 @@ public class TennisMatch {
     private MatchType matchType;
     private boolean tieBreakInLastSet;
     private boolean inTieBreak;
-    private int currentSet;
-    private int currentGame;
+    private boolean isRunning;
 
     public TennisMatch(Player player1, Player player2, MatchType matchType, boolean tieBreakInLastSet) {
         this.player1 = player1;
         this.player2 = player2;
         this.matchType = matchType;
         this.tieBreakInLastSet = tieBreakInLastSet;
-        this.currentGame = 1;
-        this.currentSet = 1;
+        this.isRunning = true;
     }
 
     public Player getPlayer1() {
@@ -58,76 +56,127 @@ public class TennisMatch {
         }
     }
 
+    public boolean getIsRunning() {
+        return this.isRunning;
+    }
+
+    public void setIsRunning(Boolean isRunning) {
+        this.isRunning = isRunning;
+    }
+
     public void setTieBreakInLastSet(boolean tieBreakInLastSet) {
         this.tieBreakInLastSet = tieBreakInLastSet;
     }
 
     public void updateWithPointWonBy(Player player) {
-        if (!this.inTieBreak) {
-            if (player.getScore() == 3) { // si points du joueur = 40
-                if (getOtherPlayer(player).getScore() < 3) { //si autre joueur a moins de 40
-                    player.setScore(5); //joueur gagne le jeu, passe à "GAME"
-                } else if (getOtherPlayer(player).getScore() == 3 || getOtherPlayer(player).getScore() == 4 ) { //Si autre est à 40 ou A
-                    player.setScore(4);//joueur passe à "A"
+        if (this.isRunning) {
+            if (!this.inTieBreak) {
+                if (player.getScore() == 3) { // si points du joueur = 40
+                    if (getOtherPlayer(player).getScore() < 3) { //si autre joueur a moins de 40
+                        player.setScore(5); //joueur gagne le jeu, passe à "GAME"
+                    } else if (getOtherPlayer(player).getScore() == 3 || getOtherPlayer(player).getScore() == 4 ) { //Si autre est à 40 ou A
+                        player.setScore(4);//joueur passe à "A"
+                    }
+                } else {
+                    player.updateScore(1);
                 }
-            } else {
-                player.updateScore(1);
-            }
 
-            if (pointsForPlayer(player) == "A") {
-                if (pointsForPlayer(getOtherPlayer(player)) == "A") {
-                    getOtherPlayer(player).setScore(3);
-                    player.setScore(3);
-                    //Les deux joueurs passent à 40
+                if (pointsForPlayer(player) == "A") {
+                    if (pointsForPlayer(getOtherPlayer(player)) == "A") {
+                        getOtherPlayer(player).setScore(3);
+                        player.setScore(3);
+                        //Les deux joueurs passent à 40
+                    }
                 }
-            }
 
-            if (pointsForPlayer(player) == "GAME") {
-                player.updateGames(1);
-                System.out.println("won point");
-                //Gain du set puisque 2 points d'écart
-                if (player.getGames() == 6) {
-                    if (getOtherPlayer(player).getGames() == 6) {
-                        if (this.matchType.equals(2)) {
-                            if (this.tieBreakInLastSet && player.getSets() == 1) {
-                                System.out.println("dernier set avec tie break");
-                                this.inTieBreak = true;
+                if (pointsForPlayer(player) == "GAME") {
+                    player.updateGames(1);
+                    System.out.println("won game for "+player.getName());
+                    //Gain du set puisque 2 points d'écart
+                    if (player.getGames() >= 6) { //Dans le cas d'un problème de gain du set
+                        System.out.println("Equals or more than 6 games");
+                        if (getOtherPlayer(player).getGames() == 6) {
+                            System.out.println("Both have 6 games");
+                            if (this.matchType.numberOfSetsToWin() == 2) {
+                                if (this.tieBreakInLastSet && player.getSets() == 1) {
+                                    System.out.println("dernier set avec tie break");
+                                    this.inTieBreak = true;
+                                } else {
+                                    System.out.println("dernier set sans tie break");
+                                }
                             } else {
-                                System.out.println("dernier set sans tie break");
+                                if (this.tieBreakInLastSet && player.getSets() == 2) {
+                                    System.out.println("dernier set avec tie break");
+                                    this.inTieBreak = true;
+                                } else {
+                                    System.out.println("dernier set sans tie break");
+                                }
                             }
-                        } else {
-                            if (this.tieBreakInLastSet && player.getSets() == 2) {
-                                System.out.println("dernier set avec tie break");
-                                this.inTieBreak = true;
-                            } else {
-                                System.out.println("dernier set sans tie break");
-                            }
+                        } else if (player.getScore() >= 7 && player.getScore() >= getOtherPlayer(player).getScore() + 2) {
+                            System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
+                            addSetToPlayer(player);
                         }
-
+                    } else if (player.getGames() == 7 && getOtherPlayer(player).getGames() == 5) {
+                        System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
+                        addSetToPlayer(player);
                     } else if (player.getGames() == getOtherPlayer(player).getGames() + 2) {
                         System.out.println(player.getName() + " gagne un set car 2 jeux d'écart et au moins 6");
                         addSetToPlayer(player);
                     }
-                } else if (player.getGames() == 7 && getOtherPlayer(player).getGames() == 5) {
-                    System.out.println(player.getName() + " gagne un set car 2 jeux d'écart au dessus de 6");
-                    addSetToPlayer(player);
+                    player.setScore(0);
+                    getOtherPlayer(player).setScore(0);
                 }
-                player.setScore(0);
-                getOtherPlayer(player).setScore(0);
-            }
-        } else if (this.inTieBreak) { //tie break sur le dernier set
-            player.updateScore(1);
-            if (player.getScore() == 7) { //Si on a 7 points...
-                if (getOtherPlayer(player).getScore() <= 5) { //...On teste de savoir si l'autre joueur a 5 ou moins et win si c'est le cas
+            } else if (this.inTieBreak) { //tie break sur le dernier set
+                player.updateScore(1);
+                if (player.getScore() == 7) { //Si on a 7 points...
+                    if (getOtherPlayer(player).getScore() <= 5) { //...On teste de savoir si l'autre joueur a 5 ou moins et win si c'est le cas
+                        addSetToPlayer(player);
+                    }
+                } else if (player.getScore() >= 7 && player.getScore() >= getOtherPlayer(player).getScore() + 2) { // si score du joueur est superieur ou égal à score du j2 + 2
                     addSetToPlayer(player);
+                } else {
+                    System.out.print("Still not won with the tie break because no gap of 2...\n");
                 }
-            } else if (player.getScore() >= 7 && player.getScore() >= getOtherPlayer(player).getScore() + 2) { // si score du joueur est superieur ou égal à score du j2 + 2
-                    addSetToPlayer(player);
-            } else {
-                System.out.print("Still not won with the tie break because no gap of 2...\n");
             }
+            //Check for winner here
+            Player winner = checkForWinner(player);
+            if (winner != null) {
+                System.out.println("LE JOUEUR " +
+                        winner.getName() +
+                        " REMPORTE LE MATCH FACE A " +
+                        getOtherPlayer(winner).getName() +
+                        " AVEC UN SCORE DE " + winner.getSets() + "-" + getOtherPlayer(winner).getSets() + " !");
+
+                this.isRunning = false;
+            }
+        } else {
+            System.out.println("Mise à jour impossible : le match est terminé !");
         }
-        //Check for winner here
+    }
+
+    public Player checkForWinner(Player player) {
+        Player p1 = player;
+        Player p2 = getOtherPlayer(player);
+        switch(this.matchType.numberOfSetsToWin()) {
+            case 2:
+                if (p1.getSets() == 2) {
+                    return p1;
+                } else if (p2.getSets() == 2) {
+                    return p2;
+                } else {
+                    return null;
+                }
+            case 3:
+                if (p1.getSets() == 3) {
+                    return p1;
+                } else if (p2.getSets() == 3) {
+                    return p2;
+                } else {
+                    return null;
+                }
+            default:
+                return null;
+        }
     }
 
     public void addSetToPlayer(Player player) {
